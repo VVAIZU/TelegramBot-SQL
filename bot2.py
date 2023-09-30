@@ -4,7 +4,7 @@ from telebot import types
 import os
 
 # Получите URL вашей базы данных PostgreSQL из переменной окружения на платформе Railway
-DATABASE_URL = os.environ.get("postgresql://postgres:Rt3Pjsqg0hyocZArFw2Z@containers-us-west-86.railway.app:6042/railway")
+DATABASE_URL = "postgresql://postgres:Rt3Pjsqg0hyocZArFw2Z@containers-us-west-86.railway.app:6042/railway"
 
 # Инициализируем Telegram бота
 bot = telebot.TeleBot('6372475462:AAHqvbkS5n-4p4J5oqXx0D9o9uAoWgomk8A')
