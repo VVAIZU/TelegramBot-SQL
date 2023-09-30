@@ -7,7 +7,7 @@ import os
 DATABASE_URL = "postgresql://postgres:Rt3Pjsqg0hyocZArFw2Z@containers-us-west-86.railway.app:6042/railway"
 
 # Инициализируем Telegram бота
-bot = telebot.TeleBot('6372475462:AAHqvbkS5n-4p4J5oqXx0D9o9uAoWgomk8A')
+bot = telebot.TeleBot('6509291140:AAFc9XmUUPzfo_h2jz_km22MX25Xjga9aWs')
 
 try:
     # Подключаемся к базе данных PostgreSQL
