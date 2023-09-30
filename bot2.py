@@ -20,20 +20,36 @@ except psycopg2.OperationalError as e:
 # Обработчик команды /start
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "Добро пожаловать! Выберите учебник:")
+    try:
+        # Отправляем гифку
+        sticker_id = 'CAACAgIAAxkBAAEKbFRlGFifpx0Q0UbzLXpiLSd29qr0dAACIz4AAhAmwEhtUD59z9j9GzAE'  # Замените на реальную ссылку на ваш стикер
+        bot.send_sticker(message.chat.id, sticker_id)
 
-    # Запрос к базе данных PostgreSQL для получения списка учебников
-    cursor.execute("SELECT id, name FROM textbooks")
-    textbooks = cursor.fetchall()
+        # Отправляем приветственное сообщение
+        welcome_message = (
+        "Добро пожаловать в MonkeyStudyCo!\n"
+        "Постоянная необходимость обновлять и расширять набор навыков сотрудников ставит перед компаниями непростую задачу: "
+        "создать максимально эффективную систему обучения. Проект «Monkey Study Co.» представляет собой инновационную образовательную платформу, "
+        "ориентированную на развитие навыков и переподготовку персонала в условиях быстро меняющегося рынка труда.\n"
+        "Выберите учебник:"
+        )
 
-    # Создаем InlineKeyboardMarkup с кнопками для выбора учебника
-    keyboard = types.InlineKeyboardMarkup(row_width=1)
-    for textbook in textbooks:
-        textbook_id, textbook_name = textbook
-        key = types.InlineKeyboardButton(text=textbook_name, callback_data=f'textbook_{textbook_id}')
-        keyboard.add(key)
+        bot.reply_to(message, welcome_message, parse_mode='Markdown')
 
-    bot.send_message(message.chat.id, text='Выберите учебник:', reply_markup=keyboard)
+        # Запрос к базе данных PostgreSQL для получения списка учебников
+        cursor.execute("SELECT id, name FROM textbooks")
+        textbooks = cursor.fetchall()
+
+        # Создаем InlineKeyboardMarkup с кнопками для выбора учебника
+        keyboard = types.InlineKeyboardMarkup(row_width=1)
+        for textbook in textbooks:
+            textbook_id, textbook_name = textbook
+            key = types.InlineKeyboardButton(text=textbook_name, callback_data=f'textbook_{textbook_id}')
+            keyboard.add(key)
+
+        bot.send_message(message.chat.id, text='Выберите учебник:', reply_markup=keyboard)
+    except Exception as e:
+        bot.send_message(message.chat.id, "Сервер не ответил, попробуйте еще раз.")
 
 # Обработчик нажатий на кнопки учебников
 @bot.callback_query_handler(lambda call: call.data.startswith('textbook_'))
