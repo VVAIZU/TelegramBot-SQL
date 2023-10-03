@@ -106,7 +106,8 @@ def handle_text_message(message):
     except Exception as e:
         bot.send_message(message.chat.id, "Сервер не ответил, попробуйте еще раз.")
 
-# Обработчик нажатий на кнопки задач
+
+#Обработчик нажатий на кнопки задач
 @bot.callback_query_handler(lambda call: call.data.startswith('task_'))
 def handle_task_query(call):
     task_id = int(call.data.split('_')[1])
@@ -117,8 +118,16 @@ def handle_task_query(call):
 
     if task_data:
         task_name, solution_text, image_url = task_data
-        bot.send_message(call.message.chat.id, text=f'Задача: {task_name}\nРешение:\n{solution_text}')
-        
+        message_text = f'Задача: {task_name}\nРешение:\n{solution_text}'
+
+        # Отправляем огромный текст в сообщениях с разбивкой на более короткие части
+        while len(message_text) > 4000:
+            part, message_text = message_text[:4000], message_text[4000:]
+            bot.send_message(call.message.chat.id, part, parse_mode='HTML')
+
+        # Отправляем оставшуюся часть сообщения
+        bot.send_message(call.message.chat.id, message_text, parse_mode='HTML')
+
         if image_url:
             bot.send_photo(call.message.chat.id, photo=image_url)  # Отправляем изображение
     else:
