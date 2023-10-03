@@ -69,6 +69,38 @@ def handle_textbook_query(call):
 
     bot.send_message(call.message.chat.id, text='Выберите задачу:', reply_markup=keyboard)
 
+@bot.message_handler(func=lambda message: True)
+def handle_text_message(message):
+    try:
+        # Получите текст сообщения от пользователя
+        user_message = message.text.strip()
+
+        # Проверьте, совпадает ли текст сообщения с названием учебника
+        cursor.execute("SELECT id, name FROM textbooks WHERE name ILIKE %s", (user_message,))
+        textbook = cursor.fetchone()
+
+        if textbook:
+            textbook_id, textbook_name = textbook
+
+            # Запрос к базе данных PostgreSQL для получения списка задач для выбранного учебника
+            cursor.execute("SELECT id, name FROM tasks WHERE textbook_id = %s", (textbook_id,))
+            tasks = cursor.fetchall()
+
+            # Создаем InlineKeyboardMarkup с кнопками для выбора задачи
+            keyboard = types.InlineKeyboardMarkup(row_width=1)
+            for task in tasks:
+                task_id, task_name = task
+                key = types.InlineKeyboardButton(text=task_name, callback_data=f'task_{task_id}')
+                keyboard.add(key)
+
+            bot.send_message(message.chat.id, text=f'Выберите задачу из учебника "{textbook_name}":', reply_markup=keyboard)
+        else:
+            bot.send_message(message.chat.id, "Учебник не найден. Выберите учебник из списка.")
+
+    except Exception as e:
+        bot.send_message(message.chat.id, "Сервер не ответил, попробуйте еще раз.")
+
+
 # Обработчик нажатий на кнопки задач
 @bot.callback_query_handler(lambda call: call.data.startswith('task_'))
 def handle_task_query(call):
