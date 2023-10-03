@@ -83,28 +83,23 @@ def handle_text_message(message):
             textbook_id, textbook_name = textbook
 
             # Запрос к базе данных PostgreSQL для получения списка задач для выбранного учебника
-            cursor.execute("SELECT id, name, solution, image_url FROM tasks WHERE textbook_id = %s", (textbook_id,))
+            cursor.execute("SELECT id, name FROM tasks WHERE textbook_id = %s", (textbook_id,))
             tasks = cursor.fetchall()
 
+            # Создаем InlineKeyboardMarkup с кнопками для выбора задачи
+            keyboard = types.InlineKeyboardMarkup(row_width=1)
             for task in tasks:
-                task_id, task_name, solution_text, image_url = task
-                message_text = f'Задача: {task_name}\nРешение:\n{solution_text}'
+                task_id, task_name = task
+                key = types.InlineKeyboardButton(text=task_name, callback_data=f'task_{task_id}')
+                keyboard.add(key)
 
-                # Отправляем огромный текст в сообщениях с разбивкой на более короткие части
-                while len(message_text) > 4000:
-                    part, message_text = message_text[:4000], message_text[4000:]
-                    bot.send_message(message.chat.id, part, parse_mode='HTML')
-
-                # Отправляем оставшуюся часть сообщения
-                bot.send_message(message.chat.id, message_text, parse_mode='HTML')
-                
-                if image_url:
-                    bot.send_photo(message.chat.id, photo=image_url)  # Отправляем изображение
+            bot.send_message(message.chat.id, text=f'Выберите задачу из учебника "{textbook_name}":', reply_markup=keyboard)
         else:
             bot.send_message(message.chat.id, "Учебник не найден. Выберите учебник из списка.")
 
     except Exception as e:
         bot.send_message(message.chat.id, "Сервер не ответил, попробуйте еще раз.")
+
 
 
 #Обработчик нажатий на кнопки задач
